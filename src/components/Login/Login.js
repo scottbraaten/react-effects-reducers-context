@@ -4,23 +4,32 @@ import Card from '../UI/Card/Card';
 import classes from './Login.module.css';
 import Button from '../UI/Button/Button';
 
-const emailReducer = (state, action) => {
+const variableReducer = (state, action) => {
   if (action.type === 'USER_INPUT') {
-    return {valid: action.val.includes('@'), value: action.val}
+    return {valid: action.cond(action.val), value: action.val}
   }
   if (action.type === 'INPUT_BLUR') {
-    return {valid: state.value.includes('@'), value: state.value}
+    return {valid: action.cond(state.value), value: state.value}
   }
 }
 
-const passwordReducer = (state, action) => {
-  if (action.type === 'USER_INPUT') {
-    return {valid: action.val.trim().length > 6, value: action.val}
-  }
-  if (action.type === 'INPUT_BLUR') {
-    return {valid: state.value.trim().length > 6, value: state.value}
-  }
-}
+// const emailReducer = (state, action) => {
+//   if (action.type === 'USER_INPUT') {
+//     return {valid: action.val.includes('@'), value: action.val}
+//   }
+//   if (action.type === 'INPUT_BLUR') {
+//     return {valid: state.value.includes('@'), value: state.value}
+//   }
+// }
+
+// const passwordReducer = (state, action) => {
+//   if (action.type === 'USER_INPUT') {
+//     return {valid: action.val.trim().length > 6, value: action.val}
+//   }
+//   if (action.type === 'INPUT_BLUR') {
+//     return {valid: state.value.trim().length > 6, value: state.value}
+//   }
+// }
 
 const Login = (props) => {
   // const [enteredEmail, setEnteredEmail] = useState('');
@@ -29,43 +38,46 @@ const Login = (props) => {
   // const [passwordIsValid, setPasswordIsValid] = useState();
   const [formIsValid, setFormIsValid] = useState(false);
 
-  const [emailState, dispatchEmail] = useReducer(emailReducer, {valid: undefined, value: ''});
-  const [passwordState, dispatchPassword] = useReducer(passwordReducer, {valid: undefined, value: ''});
+  const [emailState, dispatchEmail] = useReducer(variableReducer, {valid: undefined, value: ''});
+  const [passwordState, dispatchPassword] = useReducer(variableReducer, {valid: undefined, value: ''});
+
+  const {valid: emailV} = emailState;
+  const {valid: passwV} = passwordState;
 
   useEffect(() => {
     const identifier = setTimeout(() => {
       setFormIsValid(
-        emailState.valid && passwordState.valid
+        emailV && passwV
       );
     }, 500);
 
     return () => {
       clearTimeout(identifier);
     };
-  }, [emailState, passwordState]);
+  }, [emailV, passwV]);
 
   const emailChangeHandler = (event) => {
-    dispatchEmail({type: 'USER_INPUT', val: event.target.value});
+    dispatchEmail({type: 'USER_INPUT', val: event.target.value, cond: (a) => a.includes('@')});
 
-    setFormIsValid(
-      passwordState.valid && event.target.value.includes('@')
-    );
+    // setFormIsValid(
+    //   passwordState.valid && event.target.value.includes('@')
+    // );
   };
 
   const passwordChangeHandler = (event) => {
-    dispatchPassword({type: 'USER_INPUT', val: event.target.value});
+    dispatchPassword({type: 'USER_INPUT', val: event.target.value, cond: (a) => a.trim().length > 6});
 
-    setFormIsValid(
-      emailState.valid && event.target.value.length > 6
-    );
+    // setFormIsValid(
+    //   emailState.valid && event.target.value.length > 6
+    // );
   };
 
   const validateEmailHandler = () => {
-    dispatchEmail({type: 'INPUT_BLUR'});
+    dispatchEmail({type: 'INPUT_BLUR', cond: (a) => a.includes('@')});
   };
 
   const validatePasswordHandler = () => {
-    dispatchPassword({type: 'INPUT_BLUR'});
+    dispatchPassword({type: 'INPUT_BLUR', cond: (a) => a.trim().length > 6});
   };
 
   const submitHandler = (event) => {
