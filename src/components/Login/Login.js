@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, useReducer, useContext } from 'react';
 
 import Card from '../UI/Card/Card';
 import classes from './Login.module.css';
 import Button from '../UI/Button/Button';
+import AuthContext from '../../context/auth-context';
 
 const variableReducer = (state, action) => {
   if (action.type === 'USER_INPUT') {
@@ -13,29 +14,9 @@ const variableReducer = (state, action) => {
   }
 }
 
-// const emailReducer = (state, action) => {
-//   if (action.type === 'USER_INPUT') {
-//     return {valid: action.val.includes('@'), value: action.val}
-//   }
-//   if (action.type === 'INPUT_BLUR') {
-//     return {valid: state.value.includes('@'), value: state.value}
-//   }
-// }
-
-// const passwordReducer = (state, action) => {
-//   if (action.type === 'USER_INPUT') {
-//     return {valid: action.val.trim().length > 6, value: action.val}
-//   }
-//   if (action.type === 'INPUT_BLUR') {
-//     return {valid: state.value.trim().length > 6, value: state.value}
-//   }
-// }
-
 const Login = (props) => {
-  // const [enteredEmail, setEnteredEmail] = useState('');
-  // const [emailIsValid, setEmailIsValid] = useState();
-  // const [enteredPassword, setEnteredPassword] = useState('');
-  // const [passwordIsValid, setPasswordIsValid] = useState();
+  const authContext = useContext(AuthContext);
+
   const [formIsValid, setFormIsValid] = useState(false);
 
   const [emailState, dispatchEmail] = useReducer(variableReducer, {valid: undefined, value: ''});
@@ -58,18 +39,10 @@ const Login = (props) => {
 
   const emailChangeHandler = (event) => {
     dispatchEmail({type: 'USER_INPUT', val: event.target.value, cond: (a) => a.includes('@')});
-
-    // setFormIsValid(
-    //   passwordState.valid && event.target.value.includes('@')
-    // );
   };
 
   const passwordChangeHandler = (event) => {
     dispatchPassword({type: 'USER_INPUT', val: event.target.value, cond: (a) => a.trim().length > 6});
-
-    // setFormIsValid(
-    //   emailState.valid && event.target.value.length > 6
-    // );
   };
 
   const validateEmailHandler = () => {
@@ -82,7 +55,7 @@ const Login = (props) => {
 
   const submitHandler = (event) => {
     event.preventDefault();
-    props.onLogin(emailState.value, passwordState.value);
+    authContext.onLogin(emailState.value, passwordState.value);
   };
 
   return (
